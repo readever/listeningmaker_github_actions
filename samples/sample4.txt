@@ -1,0 +1,5 @@
+[M]
+A new AI video model speeds up short-video generation. It keeps characters steady and supports audio reference for lip-sync. Creators can make short clips for social platforms at lower cost. Local deployment is still hard for regular Macs, so cloud APIs remain the main choice for most users.
+
+[W]
+Engineers test a new laser communication system for lunar missions. It sends data far faster than traditional radio links, delivering high-resolution images back to Earth steadily. This technology will support future Moon landings and long-distance space exploration, laying groundwork for stable deep-space networking.
