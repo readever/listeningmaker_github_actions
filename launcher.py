@@ -12,6 +12,14 @@ import time
 import traceback
 import webbrowser
 
+# --windowed PyInstaller builds on Windows have NO stdout/stderr (they are None).
+# uvicorn's default log formatter calls sys.stdout.isatty() and dies on None
+# ("Unable to configure formatter 'default'") — point them at devnull instead.
+if sys.stdout is None:
+    sys.stdout = open(os.devnull, "w", encoding="utf-8")
+if sys.stderr is None:
+    sys.stderr = open(os.devnull, "w", encoding="utf-8")
+
 if sys.platform == "win32":
     # frozen Windows apps must init multiprocessing before anything spawns subprocesses (torch etc.)
     import multiprocessing
