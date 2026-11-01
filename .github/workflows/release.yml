@@ -43,7 +43,7 @@ jobs:
           STAGE=/tmp/lm-dmg-stage
           rm -rf "$STAGE" && mkdir -p "$STAGE"
           cp -R dist/ListeningMaker.app "$STAGE"/
-          cp "!首次打开必读.txt" "$STAGE"/
+          cp *.txt "$STAGE"/  # 首次打开必读.txt（文件名含全角感叹号，用通配符避免编码不匹配）
           ln -s /Applications "$STAGE/Applications"
           hdiutil create -volname ListeningMaker -srcfolder "$STAGE" -ov -format UDZO \
             "dist/ListeningMaker-${VER}-mac-arm64.dmg"
