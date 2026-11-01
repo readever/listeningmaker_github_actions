@@ -29,7 +29,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install simplestart==0.0.1.66 pocket_tts pywebview pyinstaller
+          pip install simplestart==0.0.1.69 pocket_tts pywebview pyinstaller
 
       - name: Warm model cache (downloaded once, then bundled into the app)
         run: python warm_models.py
@@ -43,6 +43,7 @@ jobs:
           STAGE=/tmp/lm-dmg-stage
           rm -rf "$STAGE" && mkdir -p "$STAGE"
           cp -R dist/ListeningMaker.app "$STAGE"/
+          cp "!首次打开必读.txt" "$STAGE"/
           ln -s /Applications "$STAGE/Applications"
           hdiutil create -volname ListeningMaker -srcfolder "$STAGE" -ov -format UDZO \
             "dist/ListeningMaker-${VER}-mac-arm64.dmg"

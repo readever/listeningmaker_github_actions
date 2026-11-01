@@ -22,7 +22,7 @@
 ```bash
 conda create -n ssbuild python=3.10 -y
 conda activate ssbuild
-pip install simplestart==0.0.1.66 pocket_tts pywebview pyinstaller
+pip install simplestart==0.0.1.69 pocket_tts pywebview pyinstaller
 python warm_models.py      # 可选，内置模型免联网（~335MB）
 bash build.sh
 ```
