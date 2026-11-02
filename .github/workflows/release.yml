@@ -45,8 +45,16 @@ jobs:
           cp -R dist/ListeningMaker.app "$STAGE"/
           cp *.txt "$STAGE"/  # 首次打开必读.txt（文件名含全角感叹号，用通配符避免编码不匹配）
           ln -s /Applications "$STAGE/Applications"
-          hdiutil create -volname ListeningMaker -srcfolder "$STAGE" -ov -format UDZO \
-            "dist/ListeningMaker-${VER}-mac-arm64.dmg"
+          # hdiutil occasionally fails with "Resource busy" when diskimages-helper
+          # from an earlier operation (or Spotlight) still holds the folder — retry.
+          for i in 1 2 3; do
+            if hdiutil create -volname ListeningMaker -srcfolder "$STAGE" -ov -format UDZO \
+              "dist/ListeningMaker-${VER}-mac-arm64.dmg"; then break; fi
+            echo "::warning::hdiutil attempt $i failed — killing diskimages-helper and retrying"
+            pkill -9 -f diskimages-helper || true
+            sleep 10
+            [ "$i" = 3 ] && exit 1
+          done
 
       - name: Build Windows (onedir + zip)
         if: matrix.plat == 'win'
