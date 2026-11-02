@@ -29,7 +29,7 @@ HI_ARGS=()
 for m in $SUBMODS; do HI_ARGS+=(--hidden-import "$m"); done
 echo ">>> explicit hidden-imports for simplestart subpackages: ${#HI_ARGS[@]}"
 
-$PY -m PyInstaller \
+$PY build_local.py \
   --name ListeningMaker \
   --onedir \
   --windowed \

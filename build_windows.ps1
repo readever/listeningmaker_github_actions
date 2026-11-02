@@ -1,6 +1,6 @@
 # Build ListeningMaker for Windows (x64, CPU torch).
 # Run inside a clean Python 3.10 env with PyPI simplestart installed:
-#   pip install simplestart==0.0.1.69 pocket_tts pywebview pyinstaller
+#   pip install simplestart==0.0.1.70 pocket_tts pywebview pyinstaller
 #   python warm_models.py        # optional: bundle the TTS model for offline use
 #   powershell -File build_windows.ps1
 $ErrorActionPreference = "Stop"

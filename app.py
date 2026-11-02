@@ -1,4 +1,4 @@
-import os, re, sys, time, wave
+import os, re, shutil, subprocess, sys, time, wave
 from contextlib import suppress
 
 import numpy as np
@@ -57,6 +57,7 @@ for _k in ("short", "long", "passage"):  # per-tab status, so switching tabs nev
     setattr(S, f"status_{_k}", getattr(S, f"status_{_k}", None) or "粘贴听力原文，点击「生成音频」。")
 
 S.clone_hint = S.clone_hint or ""
+S.save_msg = S.save_msg or ""
 
 _states = {}  # voice token (built-in name or clone sample path) -> cached model state
 clone_paths = {"male": "", "female": ""}  # slot -> uploaded clone sample path; each client runs its own copy of this page, so no cross-user clash
@@ -232,7 +233,8 @@ def run_gen(kind, text, male, female, gap, speed, key):
         write_wav(out, audio)
         with wave.open(out) as w:
             dur = w.getnframes() / w.getframerate()
-        note(f"✅ 生成完成：{dur:.0f} 秒音频，用时 {time.time() - t0:.1f} 秒。可在线试听或下载。")
+        S.last_out = out  # remembered for the desktop save button (webview can't do browser downloads)
+        note(f"✅ 生成完成：{dur:.0f} 秒音频，用时 {time.time() - t0:.1f} 秒。" + ("点播放器右上角下载图标可保存到下载文件夹。" if FROZEN else "可在线试听或下载。"))
         for d in (OUT_DIR, UPLOAD_DIR):  # cap both outputs and uploads at KEEP files each
             if os.path.isdir(d):
                 files = sorted((os.path.join(d, f) for f in os.listdir(d)), key=os.path.getmtime)
@@ -255,6 +257,31 @@ def gen(kind, text, key):
         ss.refresh_page()
         return
     run_gen(kind, text, male, female, float(gap_sel.value.split()[0]), float(speed_sel.value), key)
+
+
+def save_audio(e):
+    """Copy the last generated wav to ~/Downloads and reveal it in Finder/Explorer.
+
+    The packaged app runs in a webview (WKWebView / WebView2): the player's built-in
+    download button is a browser <a download> link, which WKWebView turns into an
+    in-page navigation (QuickTime takes over) and WebView2 silently ignores.
+    """
+    out = getattr(S, "last_out", "")
+    if not out or not os.path.isfile(out):
+        S.save_msg = "请先生成音频"
+        ss.refresh_page()
+        return
+    dest_dir = os.path.join(os.path.expanduser("~"), "Downloads")
+    if not os.path.isdir(dest_dir):
+        dest_dir = DATA_DIR
+    dest = os.path.join(dest_dir, os.path.basename(out))
+    shutil.copy2(out, dest)
+    S.save_msg = f"✅ 已保存：{dest}"
+    if sys.platform == "darwin":
+        subprocess.Popen(["open", "-R", dest])  # reveal in Finder
+    elif sys.platform == "win32":
+        subprocess.Popen(["explorer", "/select,", os.path.normpath(dest)])  # reveal in Explorer
+    ss.refresh_page()
 
 
 def on_male_sel(e):  # picked 克隆男声 with no sample yet → reopen the clone area and say what to do
@@ -373,7 +400,25 @@ with ss.row(justify="center"):
 ss.space(16)
 with ss.row(justify="center"):
     with ss.panel(width="760px", padding=16):
-        player = ss.audio(downloadable=True, block=True, color="#FF6D00")
+        with ss.row(no_gutters=True):
+            if FROZEN:  # ondownload intercepts the player's native download click → save_audio (copy to ~/Downloads + reveal); button/UI is the web player's own, no CSS hack
+                player = ss.audio(downloadable=True, ondownload=save_audio, block=True, color="#FF6D00")
+            else:
+                player = ss.audio(downloadable=True, block=True, color="#FF6D00")
+        if FROZEN:
+            ss.space(8)
+            ss.text("@@save_msg", size="small", type="grey-darken-1")
+ss.space(16)
+if not FROZEN:  # 单源：本文件同时服务网页版（sys.frozen=False）与 CI 打包版（=True），CI 仓的 app.py 是本文件的逐字节拷贝
+    with ss.row(justify="center"):
+        with ss.panel(width="760px", padding=16):
+            with ss.row(align="center", justify="space-between", no_gutters=True, style="width:100%; flex-wrap:wrap; gap:8px;"):
+                ss.text("💾 桌面版 ListeningMaker（本地运行 · 不限量 · 纯离线）", tag="b")
+                ss.link("安装包发布页", href="https://modelscope.cn/models/simplestart/listeningmaker", target="_blank", tag_style=True)
+            ss.text("与网页版同功能，语音模型已内置安装包，下载即用，课文内容不上传。macOS 首次打开需在「系统设置 → 隐私与安全性」中放行一次。", size="small", type="grey-darken-1")
+            with ss.row(gap=12):
+                ss.link("🍎 macOS 下载（DMG · 532 MB）", icon="bi-download", href="https://modelscope.cn/models/simplestart/listeningmaker/resolve/master/ListeningMaker-0.1.0-mac-arm64.dmg", target="_blank", variant="flat", type="primary", style="font-size:15px;")
+                ss.link("🪟 Windows 下载（ZIP · 500 MB）", icon="bi-download", href="https://modelscope.cn/models/simplestart/listeningmaker/resolve/master/ListeningMaker-0.1.0-windows-x64.zip", target="_blank", variant="flat", type="primary", style="font-size:15px;")
 with ss.row(justify="center", no_gutters=True, style="gap:0;"):
     ss.text("本工具由", size="small", style="margin-right:0"); ss.link("SimpleStart", href="https://www.simplestart.cc/zh", size="small", style="padding:4px")
     ss.text("构建 · 语音合成", size="small", style="margin-right:0"); ss.link("Kyutai Pocket TTS", href="https://github.com/kyutai-labs/pocket-tts", size="small", style="padding:4px")
