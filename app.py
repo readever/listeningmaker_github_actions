@@ -417,7 +417,7 @@ if not FROZEN:  # 单源：本文件同时服务网页版（sys.frozen=False）�
                 ss.link("安装包发布页", href="https://modelscope.cn/models/simplestart/listeningmaker", target="_blank", tag_style=True)
             ss.text("与网页版同功能，语音模型已内置安装包，下载即用，课文内容不上传。macOS 首次打开需在「系统设置 → 隐私与安全性」中放行一次。", size="small", type="grey-darken-1")
             with ss.row(gap=12):
-                ss.link("🍎 macOS 下载（DMG · 532 MB）", icon="bi-download", href="https://modelscope.cn/models/simplestart/listeningmaker/resolve/master/ListeningMaker-0.1.0-mac-arm64.dmg", target="_blank", variant="flat", type="primary", style="font-size:15px;")
+                ss.link("🍎 macOS 下载（DMG · 534 MB）", icon="bi-download", href="https://modelscope.cn/models/simplestart/listeningmaker/resolve/master/ListeningMaker-0.1.0-mac-arm64.dmg", target="_blank", variant="flat", type="primary", style="font-size:15px;")
                 ss.link("🪟 Windows 下载（ZIP · 500 MB）", icon="bi-download", href="https://modelscope.cn/models/simplestart/listeningmaker/resolve/master/ListeningMaker-0.1.0-windows-x64.zip", target="_blank", variant="flat", type="primary", style="font-size:15px;")
 with ss.row(justify="center", no_gutters=True, style="gap:0;"):
     ss.text("本工具由", size="small", style="margin-right:0"); ss.link("SimpleStart", href="https://www.simplestart.cc/zh", size="small", style="padding:4px")
